@@ -43,10 +43,10 @@ function addGraphTrigger() {
       html: graph,
       onComplete: drawGraph
     });
-    $('#stores .row_key, #weapons .row_key').each(function(_, d) {
-      $(d).colorbox({
+    $(document).on('click', '#stores .row_key, #weapons .row_key', function(ev) {
+      $.colorbox({
         html: graph,
-        onComplete: function() {drawGraph(d.innerHTML)}
+        onComplete: function() {drawGraph(ev.target.innerHTML)}
       });
     });
   }
@@ -54,7 +54,9 @@ function addGraphTrigger() {
 
 function series(type) {
   var _series = {};
-  var max = 10;
+  if (type) {
+    _series[type] = null;
+  }
   $.each(amplify.store(), function(k, v) {
     var now = Math.floor(Number(new Date()) / 1000);
     var limit = now - 60 * 60;
@@ -70,17 +72,14 @@ function series(type) {
         }
         if (time > limit) {
           _series[itype].push({x: time, y: count});
-          max = Math.max(max, count);
         }
       }
     });
   });
-  var logScale = d3.scale.log().domain([0, 20000]);
   return $.map(_series, function(v, k) {
     return {
       color: COLORS[k] || '#'+Math.floor(Math.random()*16777215).toString(16),
-      //scale: logScale,
-      data: v,
+      data: v || [{ x: 0, y: 0 }],
       name: k
     }
   });
